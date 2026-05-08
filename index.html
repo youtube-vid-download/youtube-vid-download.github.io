@@ -4,100 +4,81 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>YTLoad — YouTube Downloader</title>
-
-  <!-- Inline favicon — prevents 404 -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%23ff0000'/><polygon points='38,28 38,72 72,50' fill='white'/></svg>" />
-
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet" />
-
   <style>
     :root {
-      --bg: #0a0a0a;
-      --surface: #111111;
-      --border: #2a2a2a;
-      --accent: #ff0000;
-      --accent2: #ff4444;
-      --text: #f0f0f0;
-      --muted: #666;
-      --success: #22c55e;
-      --mono: 'Space Mono', monospace;
-      --sans: 'Syne', sans-serif;
+      --bg: #0a0a0a; --surface: #111; --border: #2a2a2a;
+      --accent: #ff0000; --accent2: #ff4444;
+      --text: #f0f0f0; --muted: #666; --success: #22c55e;
+      --warn: #f59e0b;
+      --mono: 'Space Mono', monospace; --sans: 'Syne', sans-serif;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--sans);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
-      overflow-x: hidden;
+      background: var(--bg); color: var(--text); font-family: var(--sans);
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; padding: 2rem; overflow-x: hidden;
     }
     body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(var(--border) 1px, transparent 1px),
-        linear-gradient(90deg, var(--border) 1px, transparent 1px);
-      background-size: 48px 48px;
-      opacity: 0.35;
-      z-index: 0;
-      pointer-events: none;
+      content: ''; position: fixed; inset: 0;
+      background-image: linear-gradient(var(--border) 1px, transparent 1px),
+                        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 48px 48px; opacity: .35; z-index: 0; pointer-events: none;
     }
-
     .container { position: relative; z-index: 1; width: 100%; max-width: 640px; }
 
     /* ── Header ── */
     .header { margin-bottom: 3rem; text-align: center; }
     .logo-wrap { display: inline-flex; align-items: center; gap: .7rem; margin-bottom: .75rem; }
     .logo-icon {
-      width: 44px; height: 44px;
-      background: var(--accent);
-      border-radius: 10px;
+      width: 44px; height: 44px; background: var(--accent); border-radius: 10px;
       display: flex; align-items: center; justify-content: center;
       box-shadow: 0 0 24px rgba(255,0,0,.4);
     }
     .logo-icon svg { width: 22px; height: 22px; fill: white; }
-    h1 { font-family: var(--sans); font-size: 2rem; font-weight: 800; letter-spacing: -.04em; }
+    h1 { font-size: 2rem; font-weight: 800; letter-spacing: -.04em; }
     h1 span { color: var(--accent); }
     .subtitle { font-family: var(--mono); font-size: .72rem; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; margin-top: .4rem; }
 
-    /* ── Card ── */
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; box-shadow: 0 4px 40px rgba(0,0,0,.6); }
+    /* ── Instance badge ── */
+    .instance-badge {
+      display: inline-flex; align-items: center; gap: .4rem;
+      font-family: var(--mono); font-size: .65rem; color: var(--muted);
+      margin-top: .6rem;
+    }
+    .instance-badge .dot {
+      width: 6px; height: 6px; border-radius: 50%; background: #444; flex-shrink: 0;
+      transition: background .4s;
+    }
+    .instance-badge.ok   .dot { background: var(--success); box-shadow: 0 0 6px var(--success); }
+    .instance-badge.warn .dot { background: var(--warn); }
+    .instance-badge.err  .dot { background: var(--accent); }
 
-    /* ── Options ── */
+    /* ── Card ── */
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 2rem;
+      box-shadow: 0 4px 40px rgba(0,0,0,.6);
+    }
     .options-row { display: flex; gap: .75rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
-    .select-wrapper { flex: 1; min-width: 140px; }
+    .select-wrapper { flex: 1; min-width: 130px; }
     .select-label { font-family: var(--mono); font-size: .65rem; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; display: block; margin-bottom: .4rem; }
     select {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: .65rem .9rem;
-      font-family: var(--mono);
-      font-size: .78rem;
-      color: var(--text);
+      width: 100%; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: .65rem .9rem;
+      font-family: var(--mono); font-size: .78rem; color: var(--text);
       outline: none; cursor: pointer; appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right .8rem center;
+      background-repeat: no-repeat; background-position: right .8rem center;
     }
     select:focus { border-color: var(--accent); }
 
-    /* ── Input + Button ── */
     .input-group { display: flex; gap: .75rem; margin-bottom: 1.5rem; }
     .url-input {
-      flex: 1;
-      background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
-      padding: .85rem 1.1rem;
-      font-family: var(--mono); font-size: .8rem; color: var(--text);
+      flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+      padding: .85rem 1.1rem; font-family: var(--mono); font-size: .8rem; color: var(--text);
       outline: none; transition: border-color .2s, box-shadow .2s;
     }
     .url-input::placeholder { color: #444; }
@@ -105,8 +86,7 @@
 
     .btn-download {
       background: var(--accent); color: white; border: none; border-radius: 10px;
-      padding: .85rem 1.4rem;
-      font-family: var(--sans); font-size: .85rem; font-weight: 700;
+      padding: .85rem 1.4rem; font-family: var(--sans); font-size: .85rem; font-weight: 700;
       cursor: pointer; transition: background .2s, transform .1s, box-shadow .2s;
       white-space: nowrap; letter-spacing: .02em;
     }
@@ -114,58 +94,49 @@
     .btn-download:active { transform: scale(.97); }
     .btn-download:disabled { opacity: .5; cursor: not-allowed; transform: none; }
 
-    /* ── Status boxes ── */
+    /* ── Status ── */
     .status {
       border-radius: 10px; padding: 1rem 1.25rem;
       font-family: var(--mono); font-size: .78rem;
       display: none; align-items: flex-start; gap: .75rem; line-height: 1.6;
     }
     .status.visible { display: flex; }
-    .status.loading  { background: rgba(255,255,255,.04); border: 1px solid var(--border); color: var(--muted); }
-    .status.error    { background: rgba(255,68,68,.08);   border: 1px solid rgba(255,68,68,.25); color: #ff8888; }
-    .status.success  { background: rgba(34,197,94,.07);   border: 1px solid rgba(34,197,94,.2);  color: var(--success); flex-direction: column; gap: 1rem; }
+    .status.loading { background: rgba(255,255,255,.04); border: 1px solid var(--border); color: var(--muted); }
+    .status.error   { background: rgba(255,68,68,.08);   border: 1px solid rgba(255,68,68,.25); color: #ff8888; flex-direction: column; gap: .6rem; }
+    .status.success { background: rgba(34,197,94,.07);   border: 1px solid rgba(34,197,94,.2);  color: var(--success); flex-direction: column; gap: .8rem; }
 
     .spinner { width: 16px; height: 16px; border: 2px solid #444; border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; flex-shrink: 0; margin-top: 1px; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Result links ── */
     .result-links { display: flex; flex-direction: column; gap: .5rem; width: 100%; }
-    .result-title { font-family: var(--sans); font-size: .85rem; font-weight: 700; color: var(--text); margin-bottom: .25rem; }
+    .result-title { font-family: var(--sans); font-size: .85rem; font-weight: 700; color: var(--text); }
     .dl-btn {
       display: flex; align-items: center; justify-content: space-between; gap: .5rem;
       padding: .75rem 1rem;
       background: rgba(34,197,94,.08); border: 1px solid rgba(34,197,94,.2); border-radius: 8px;
       text-decoration: none; color: var(--success);
       font-family: var(--mono); font-size: .75rem;
-      transition: background .15s, border-color .15s; cursor: pointer;
+      transition: background .15s, border-color .15s;
     }
     .dl-btn:hover { background: rgba(34,197,94,.14); border-color: rgba(34,197,94,.4); }
     .dl-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
 
-    /* ── API hint ── */
-    .hint {
-      margin-top: 1rem;
-      padding: .75rem 1rem;
-      background: rgba(255,200,0,.05);
-      border: 1px solid rgba(255,200,0,.15);
-      border-radius: 8px;
-      font-family: var(--mono);
-      font-size: .7rem;
-      color: #aaa;
-      line-height: 1.7;
-      display: none;
+    /* fallback button */
+    .btn-fallback {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .65rem 1.1rem;
+      background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.25); border-radius: 8px;
+      color: var(--warn); font-family: var(--mono); font-size: .75rem;
+      text-decoration: none; cursor: pointer; transition: background .15s;
     }
-    .hint.visible { display: block; }
-    .hint a { color: #ffcc00; text-decoration: none; }
-    .hint a:hover { text-decoration: underline; }
+    .btn-fallback:hover { background: rgba(245,158,11,.15); }
 
-    /* ── Footer ── */
-    .footer { margin-top: 1.5rem; text-align: center; font-family: var(--mono); font-size: .65rem; color: #3a3a3a; line-height: 1.8; }
+    .footer {
+      margin-top: 1.5rem; text-align: center;
+      font-family: var(--mono); font-size: .65rem; color: #3a3a3a; line-height: 1.8;
+    }
     .footer a { color: #555; text-decoration: none; }
     .footer a:hover { color: var(--muted); }
-
-    .dot { display: inline-block; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; margin-right: 6px; animation: pulse 1.5s ease-in-out infinite; }
-    @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.4; transform:scale(.7); } }
 
     @media (max-width: 480px) {
       .input-group { flex-direction: column; }
@@ -184,6 +155,10 @@
       <h1>YT<span>Load</span></h1>
     </div>
     <p class="subtitle">YouTube Video Downloader</p>
+    <div class="instance-badge" id="instanceBadge">
+      <span class="dot"></span>
+      <span id="instanceLabel">looking for a server…</span>
+    </div>
   </div>
 
   <div class="card">
@@ -228,147 +203,184 @@
 
     <div class="status loading" id="statusLoading">
       <div class="spinner"></div>
-      <span>Fetching download link …</span>
+      <span id="loadingMsg">Fetching download link…</span>
     </div>
-
     <div class="status error" id="statusError">
-      <span>⚠</span>
-      <span id="errorMsg">An error occurred.</span>
+      <div style="display:flex;gap:.6rem;align-items:flex-start"><span>⚠</span><span id="errorMsg">An error occurred.</span></div>
+      <a class="btn-fallback" id="fallbackLink" href="https://cobalt.tools" target="_blank" rel="noopener">
+        ↗ Open in cobalt.tools instead
+      </a>
     </div>
-
     <div class="status success" id="statusSuccess">
-      <div class="result-title"><span class="dot"></span>Download ready</div>
+      <div class="result-title">✓ Download ready</div>
       <div class="result-links" id="resultLinks"></div>
-    </div>
-
-    <!-- Shown only when the API is rate-limited / unreachable -->
-    <div class="hint" id="apiHint">
-      The cobalt.tools public API is rate-limited or temporarily unavailable.<br>
-      You can also paste your link directly on
-      <a href="https://cobalt.tools" target="_blank" rel="noopener">cobalt.tools</a>
-      for the same result.
     </div>
   </div>
 
   <div class="footer">
-    Powered by <a href="https://cobalt.tools" target="_blank" rel="noopener">cobalt.tools</a> API &nbsp;·&nbsp;
-    For personal use only &nbsp;·&nbsp; Respect copyright laws
+    Powered by <a href="https://cobalt.tools" target="_blank" rel="noopener">cobalt.tools</a> open instances &nbsp;·&nbsp;
+    Personal use only &nbsp;·&nbsp; Respect copyright laws
   </div>
-
 </div>
 
 <script>
-  // cobalt.tools API — POST /  (v10 format)
-  const COBALT_API = 'https://api.cobalt.tools/';
+  // ── State ────────────────────────────────────────────────────────────────
+  let instances = [];   // [{api, score}] — no-auth, CORS-enabled, YouTube-capable
+  let activeInstance = null;
 
-  function show(id) {
+  const INSTANCES_URL = 'https://instances.cobalt.best/api/instances.json';
+
+  // ── Boot: load instances ──────────────────────────────────────────────────
+  (async () => {
+    const badge = document.getElementById('instanceBadge');
+    const label = document.getElementById('instanceLabel');
+    try {
+      const res = await fetch(INSTANCES_URL, { signal: AbortSignal.timeout(8000) });
+      if (!res.ok) throw new Error('list unavailable');
+      const list = await res.json();
+
+      instances = list
+        .filter(i =>
+          i.online === true &&
+          i.info?.auth  === false &&
+          i.info?.cors  === true  &&
+          i.services?.youtube === true
+        )
+        .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
+        .map(i => ({ api: i.api, protocol: i.protocol ?? 'https' }));
+
+      if (instances.length === 0) throw new Error('no suitable instances');
+
+      activeInstance = instances[0];
+      badge.className = 'instance-badge ok';
+      label.textContent = `server: ${activeInstance.api}`;
+    } catch (e) {
+      badge.className = 'instance-badge warn';
+      label.textContent = 'no auto-server found — will use fallback';
+    }
+  })();
+
+  // ── UI helpers ────────────────────────────────────────────────────────────
+  function showStatus(id) {
     ['statusLoading','statusError','statusSuccess'].forEach(s =>
       document.getElementById(s).classList.remove('visible')
     );
-    document.getElementById('apiHint').classList.remove('visible');
     if (id) document.getElementById(id).classList.add('visible');
   }
 
-  function setError(msg, showHint = false) {
-    document.getElementById('errorMsg').textContent = msg;
-    show('statusError');
-    if (showHint) document.getElementById('apiHint').classList.add('visible');
+  function setLoading(msg) {
+    document.getElementById('loadingMsg').textContent = msg;
+    showStatus('statusLoading');
   }
 
+  function setError(msg, ytUrl) {
+    document.getElementById('errorMsg').textContent = msg;
+    if (ytUrl) document.getElementById('fallbackLink').href = 'https://cobalt.tools';
+    showStatus('statusError');
+  }
+
+  // ── Core: try one instance ────────────────────────────────────────────────
+  async function tryInstance(baseUrl, payload) {
+    const res = await fetch(baseUrl, {
+      method: 'POST',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(12000),
+    });
+    const data = await res.json();
+    if (data.status === 'error') throw Object.assign(new Error(data.error?.code ?? 'api.error'), { apiErr: true });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return data;
+  }
+
+  // ── Main download handler ─────────────────────────────────────────────────
   async function fetchVideo() {
-    const rawUrl = document.getElementById('urlInput').value.trim();
+    let rawUrl = document.getElementById('urlInput').value.trim();
     if (!rawUrl) { setError('Please enter a YouTube link.'); return; }
+    if (!/^https?:\/\//i.test(rawUrl)) rawUrl = 'https://' + rawUrl;
 
-    // Basic URL sanity check
-    let inputUrl = rawUrl;
-    if (!/^https?:\/\//i.test(inputUrl)) inputUrl = 'https://' + inputUrl;
+    const quality = document.getElementById('quality').value;
+    const dlMode  = document.getElementById('dlMode').value;
+    const codec   = document.getElementById('codec').value;
 
-    const quality  = document.getElementById('quality').value;          // "max"|"1080"|…
-    const dlMode   = document.getElementById('dlMode').value;           // "auto"|"audio"|"mute"
-    const codec    = document.getElementById('codec').value;            // "h264"|"vp9"|"av1"
+    const payload = {
+      url: rawUrl,
+      videoQuality: quality,
+      downloadMode: dlMode,
+      youtubeVideoCodec: codec,
+      audioFormat: 'mp3',
+      filenameStyle: 'pretty',
+    };
 
     const btn = document.getElementById('fetchBtn');
     btn.disabled = true;
-    show('statusLoading');
 
-    // Build payload — match cobalt v10 schema exactly
-    const payload = {
-      url: inputUrl,
-      videoQuality: quality,           // "max" is a valid value
-      downloadMode: dlMode,            // "auto" | "audio" | "mute"
-      youtubeVideoCodec: codec,        // "h264" | "vp9" | "av1"
-      audioFormat: "mp3",              // used when downloadMode = "audio"
-      filenameStyle: "pretty",
-    };
+    // Build a queue: loaded instances + any hardcoded fallbacks
+    const queue = [
+      ...instances.map(i => `${i.protocol}://${i.api}/`),
+    ].filter(Boolean);
 
-    try {
-      const res = await fetch(COBALT_API, {
-        method: 'POST',
-        headers: {
-          'Accept':       'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      // Try to parse JSON regardless of status code
-      let data;
-      try { data = await res.json(); }
-      catch { throw new Error(`Server returned ${res.status} with no JSON body`); }
-
-      if (data.status === 'error') {
-        const code = data?.error?.code ?? 'error.unknown';
-        if (res.status === 429) {
-          setError(`Rate limit reached (${code}). Try again in a moment.`, true);
-        } else {
-          setError(`API error: ${code}`, false);
-        }
-        return;
-      }
-
-      if (!res.ok) {
-        setError(`HTTP ${res.status} — ${data?.error?.code ?? 'unexpected error'}`, true);
-        return;
-      }
-
-      const links = document.getElementById('resultLinks');
-      links.innerHTML = '';
-
-      if (data.status === 'tunnel' || data.status === 'redirect') {
-        const label = dlMode === 'audio' ? '🎵 Download Audio' : '🎬 Download Video';
-        links.appendChild(makeLink(data.url, label));
-        show('statusSuccess');
-
-      } else if (data.status === 'picker') {
-        data.picker.forEach((item, i) => {
-          const label = item.type === 'video'
-            ? `🎬 Stream ${i + 1}${item.quality ? '  ·  ' + item.quality + 'p' : ''}`
-            : `🎵 Audio ${i + 1}`;
-          links.appendChild(makeLink(item.url, label));
-        });
-        show('statusSuccess');
-
-      } else {
-        setError(`Unexpected status from server: "${data.status}"`);
-      }
-
-    } catch (err) {
-      // Network-level failure (CORS, DNS, offline)
-      setError('Could not reach the API. Check your connection or try cobalt.tools directly.', true);
-      console.error('[YTLoad]', err);
-    } finally {
+    if (queue.length === 0) {
       btn.disabled = false;
+      setError('No available servers found. Try cobalt.tools directly.', rawUrl);
+      return;
     }
+
+    let lastErr = '';
+    for (let i = 0; i < queue.length; i++) {
+      const url = queue[i];
+      const label = new URL(url).hostname;
+      setLoading(`Trying ${label}… (${i+1}/${queue.length})`);
+
+      // Update badge
+      document.getElementById('instanceBadge').className = 'instance-badge';
+      document.getElementById('instanceLabel').textContent = `connecting to ${label}…`;
+
+      try {
+        const data = await tryInstance(url, payload);
+        // ✅ Success
+        document.getElementById('instanceBadge').className = 'instance-badge ok';
+        document.getElementById('instanceLabel').textContent = `server: ${label}`;
+
+        const links = document.getElementById('resultLinks');
+        links.innerHTML = '';
+
+        if (data.status === 'tunnel' || data.status === 'redirect') {
+          links.appendChild(makeLink(data.url, dlMode === 'audio' ? '🎵 Download Audio' : '🎬 Download Video'));
+        } else if (data.status === 'picker') {
+          data.picker.forEach((item, idx) => {
+            const lbl = item.type === 'video'
+              ? `🎬 Stream ${idx+1}${item.quality ? '  ·  '+item.quality+'p' : ''}`
+              : `🎵 Audio ${idx+1}`;
+            links.appendChild(makeLink(item.url, lbl));
+          });
+        }
+
+        showStatus('statusSuccess');
+        btn.disabled = false;
+        return;
+
+      } catch (err) {
+        lastErr = err.message;
+        // If it's an API-level error (not network), skip remaining instances
+        if (err.apiErr) break;
+        // Otherwise try next instance
+      }
+    }
+
+    // All failed
+    document.getElementById('instanceBadge').className = 'instance-badge err';
+    document.getElementById('instanceLabel').textContent = 'all servers failed';
+    setError(`All servers failed (${lastErr}). Use the button below to open cobalt.tools directly.`, rawUrl);
+    btn.disabled = false;
   }
 
+  // ── Link builder ──────────────────────────────────────────────────────────
   function makeLink(href, label) {
     const a = document.createElement('a');
-    a.href = href;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
+    a.href = href; a.target = '_blank'; a.rel = 'noopener noreferrer';
     a.className = 'dl-btn';
-    a.innerHTML = `
-      <span>${label}</span>
+    a.innerHTML = `<span>${label}</span>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
         <polyline points="7 10 12 15 17 10"/>
@@ -377,6 +389,7 @@
     return a;
   }
 
+  // ── Enter key ─────────────────────────────────────────────────────────────
   document.getElementById('urlInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') fetchVideo();
   });
